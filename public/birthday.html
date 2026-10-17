@@ -1872,19 +1872,21 @@
       const musicPlayerStatus = document.getElementById("music-player-status");
       const musicTrackIds = Array.from(musicSelect.options, (option) => option.value);
       let musicTrackIndex = 0;
+      let musicRequestedTrackId = musicTrackIds[0];
       let musicController = null;
       let musicHasStarted = false;
       let musicIsAdvancing = false;
 
       function playMoratTrack(index) {
         musicTrackIndex = index;
+        musicRequestedTrackId = musicTrackIds[index];
         musicHasStarted = false;
+        musicIsAdvancing = false;
         musicSelect.selectedIndex = index;
         const songName = musicSelect.options[index].textContent;
-        musicPlayerStatus.textContent = `Reproduciendo ${index + 1} de ${musicTrackIds.length}: ${songName}`;
+        musicPlayerStatus.textContent = `Cargando ${index + 1} de ${musicTrackIds.length}: ${songName}`;
         if (musicController) {
-          musicController.loadEntity(`spotify:track:${musicTrackIds[index]}`, false);
-          musicController.play();
+          musicController.loadEntity(`spotify:track:${musicRequestedTrackId}`, false);
         }
       }
 
@@ -1922,7 +1924,7 @@
             controller.addListener("playback_started", (event) => {
               const activeTrackId = event.data.playingURI.split(":").pop();
               const activeTrackIndex = musicTrackIds.indexOf(activeTrackId);
-              if (activeTrackIndex === -1) return;
+              if (activeTrackIndex === -1 || activeTrackId !== musicRequestedTrackId) return;
               musicTrackIndex = activeTrackIndex;
               musicSelect.selectedIndex = activeTrackIndex;
               musicHasStarted = true;
