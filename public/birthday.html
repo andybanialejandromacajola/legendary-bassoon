@@ -125,65 +125,107 @@
       font-weight: 700;
     }
 
-    .music-section {
-      width: min(760px, 100%);
-      margin: 38px auto 0;
-      padding: 22px;
+    .music-widget {
+      position: fixed;
+      z-index: 20;
+      right: 16px;
+      bottom: calc(16px + env(safe-area-inset-bottom));
+      width: min(340px, calc(100vw - 24px));
+      padding: 12px;
       border: 1px solid rgba(73,54,81,.42);
-      border-radius: 14px;
-      background: rgba(255,255,255,.32);
+      border-radius: 16px;
+      background: rgba(255,255,255,.96);
+      box-shadow: 0 8px 28px rgba(39,49,34,.22);
+      color: var(--leaf);
+      text-align: left;
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
     }
 
-    .music-intro {
-      margin: 8px 0 16px;
-      color: var(--leaf-soft);
-      font-weight: 700;
-    }
-
-    .music-songs {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .music-widget-header {
+      display: flex;
+      min-height: 36px;
+      align-items: center;
+      justify-content: space-between;
       gap: 8px;
+      margin-bottom: 8px;
     }
 
-    .music-song {
-      min-height: 44px;
-      padding: 9px 12px;
-      border: 1px solid var(--purple-edge);
-      border-radius: 8px;
-      background: rgba(255,255,255,.65);
+    .music-widget-title {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .music-widget-toggle {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      flex: 0 0 auto;
+      place-items: center;
+      border: 1px solid rgba(73,54,81,.35);
+      border-radius: 50%;
+      background: #fff;
       color: var(--leaf);
       cursor: pointer;
       font: inherit;
+      font-size: 20px;
       font-weight: 700;
-      text-align: left;
+      touch-action: manipulation;
     }
 
-    .music-song[aria-pressed="true"] {
-      background: var(--purple-dark);
-      color: #fff;
+    .music-widget-toggle:focus-visible,
+    .music-select:focus-visible {
+      outline: 3px solid var(--purple);
+      outline-offset: 2px;
     }
 
-    .music-song:focus-visible {
-      outline: 3px solid #235b3a;
-      outline-offset: 3px;
+    .music-widget-content {
+      display: grid;
+      gap: 8px;
+    }
+
+    .music-select-label {
+      color: var(--leaf-soft);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .music-select {
+      width: 100%;
+      min-height: 46px;
+      padding: 8px 34px 8px 10px;
+      border: 1px solid var(--purple-edge);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--leaf);
+      font: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      touch-action: manipulation;
     }
 
     .music-player-status {
-      min-height: 24px;
-      margin: 12px 0 8px;
-      color: var(--leaf);
-      font-weight: 700;
+      min-height: 18px;
+      margin: 0;
+      color: var(--leaf-soft);
+      font-size: 12px;
+      line-height: 1.4;
     }
 
     .music-player {
       display: block;
       width: 100%;
-      aspect-ratio: 16 / 9;
+      height: 152px;
       border: 0;
-      border-radius: 10px;
-      background: #201b24;
+      border-radius: 12px;
+      background: #fff;
     }
+
+    .music-player[hidden] { display: none; }
+    .music-widget.is-collapsed .music-widget-header { margin-bottom: 0; }
+    .music-widget.is-collapsed .music-widget-content { display: none; }
 
     .icing-text {
       fill: #ffdc35;
@@ -1424,8 +1466,11 @@
       .race-throttle-controls .race-drive-button { min-width: 112px; }
       .race-route-options { grid-template-columns: minmax(0, 1fr); }
       .race-upgrade-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .music-section { padding: 16px 12px; }
-      .music-songs { grid-template-columns: 1fr; }
+      .music-widget {
+        right: 10px;
+        bottom: calc(10px + env(safe-area-inset-bottom));
+        width: min(360px, calc(100vw - 20px));
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1525,33 +1570,38 @@
     </button>
     <p class="cake-hint" id="cake-hint" aria-live="polite">Toca el pastel para ver fuegos artificiales 🎆</p>
 
-    <section class="music-section" aria-labelledby="music-heading">
-      <h2 class="section-title" id="music-heading">Música de Morat 🎵</h2>
-      <p class="music-intro">Elige una canción para reproducirla aquí desde YouTube.</p>
-      <div class="music-songs" id="music-songs">
-        <button class="music-song" type="button" data-video-id="OukQDrJ7QRQ" aria-pressed="false">1. Aprender a quererte</button>
-        <button class="music-song" type="button" data-video-id="hVR5KK2T8zQ" aria-pressed="false">2. Bajo la mesa</button>
-        <button class="music-song" type="button" data-video-id="X0KkNGp6YNU" aria-pressed="false">3. El embrujo</button>
-        <button class="music-song" type="button" data-video-id="1oeD2m2UQAI" aria-pressed="false">4. Besos en guerra</button>
-        <button class="music-song" type="button" data-video-id="IaONcfo04mc" aria-pressed="false">5. Cuando el amor se escapa</button>
-        <button class="music-song" type="button" data-video-id="sfv0xWONROg" aria-pressed="false">6. Mi suerte</button>
-        <button class="music-song" type="button" data-video-id="uldstTKAytg" aria-pressed="false">7. Acuérdate de mí</button>
-        <button class="music-song" type="button" data-video-id="ZCh1O-7oTUI" aria-pressed="false">8. Mil tormentas</button>
-        <button class="music-song" type="button" data-video-id="ooCnP_s0K6s" aria-pressed="false">9. Mi vida entera</button>
-        <button class="music-song" type="button" data-video-id="UKbhDRxm3Vc" aria-pressed="false">10. Mi nuevo vicio</button>
+    <aside class="music-widget" id="music-widget" aria-labelledby="music-heading">
+      <div class="music-widget-header">
+        <h2 class="music-widget-title" id="music-heading">Música de Morat 🎵</h2>
+        <button class="music-widget-toggle" id="music-widget-toggle" type="button" aria-label="Minimizar reproductor" aria-expanded="true" aria-controls="music-widget-content">−</button>
       </div>
-      <p class="music-player-status" id="music-player-status" role="status" aria-live="polite">Selecciona una canción para empezar a escuchar.</p>
-      <iframe
-        class="music-player"
-        id="music-player"
-        title="Reproductor de canciones de Morat en YouTube"
-        loading="lazy"
-        hidden
-        allow="autoplay; encrypted-media; picture-in-picture"
-        referrerpolicy="strict-origin-when-cross-origin"
-        allowfullscreen
-      ></iframe>
-    </section>
+      <div class="music-widget-content" id="music-widget-content">
+        <label class="music-select-label" for="music-select">Elige una canción</label>
+        <select class="music-select" id="music-select" aria-describedby="music-player-status">
+          <option value="">Selecciona una canción</option>
+          <option value="3zNcn4BaVfKORyx3uDfruW">Aprender a quererte</option>
+          <option value="1D0wDWgc24OzKjFowMMxWH">Bajo la mesa</option>
+          <option value="3iyCM8b7clmfGHTAeIzFHK">El embrujo</option>
+          <option value="5KgdtjmglXPjJNKvMvSjgo">Besos en guerra</option>
+          <option value="2fCJ4fe6s0CIRfcJpgMBpX">Cuando el amor se escapa</option>
+          <option value="2kVtMvrlcK5SRxZvdHgTzn">Mi suerte</option>
+          <option value="4NiITCc4gDXURoiQ5a7sjj">Acuérdate de mí</option>
+          <option value="3dtdmf6pvv11KNJWxKlT07">Mil tormentas</option>
+          <option value="5gipgJiWDAjeZiebW0nr0G">Mi vida entera</option>
+          <option value="5H7E0UH2F8drwjoz9ufPQm">Mi nuevo vicio</option>
+        </select>
+        <p class="music-player-status" id="music-player-status" role="status" aria-live="polite">Elige una canción y toca reproducir en Spotify.</p>
+        <iframe
+          class="music-player"
+          id="music-player"
+          title="Reproductor de audio de Morat en Spotify"
+          loading="lazy"
+          hidden
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
+          referrerpolicy="strict-origin-when-cross-origin"
+        ></iframe>
+      </div>
+    </aside>
 
     <section class="games-section" aria-labelledby="games-heading">
       <h2 class="section-title" id="games-heading">¿Quieres jugar?</h2>
@@ -1795,19 +1845,33 @@
         cakeHint.textContent = "¡Feliz cumpleaños! 🎆";
       });
 
+      const musicWidget = document.getElementById("music-widget");
+      const musicWidgetToggle = document.getElementById("music-widget-toggle");
+      const musicSelect = document.getElementById("music-select");
       const musicPlayer = document.getElementById("music-player");
       const musicPlayerStatus = document.getElementById("music-player-status");
-      document.getElementById("music-songs").addEventListener("click", (event) => {
-        const songButton = event.target.closest("[data-video-id]");
-        if (!songButton) return;
+      musicSelect.addEventListener("change", () => {
+        const trackId = musicSelect.value;
+        if (!trackId) {
+          musicPlayer.hidden = true;
+          musicPlayer.removeAttribute("src");
+          musicPlayerStatus.textContent = "Elige una canción y toca reproducir en Spotify.";
+          return;
+        }
 
+        const songName = musicSelect.selectedOptions[0].textContent;
         musicPlayer.hidden = false;
-        musicPlayer.src = `https://www.youtube-nocookie.com/embed/${songButton.dataset.videoId}?autoplay=1&playsinline=1&rel=0`;
-        musicPlayer.title = `YouTube: ${songButton.textContent.trim()}`;
-        musicPlayerStatus.textContent = `Reproduciendo: ${songButton.textContent.trim()}`;
-        document.querySelectorAll(".music-song").forEach((button) => {
-          button.setAttribute("aria-pressed", String(button === songButton));
-        });
+        musicPlayer.src = `https://open.spotify.com/embed/track/${trackId}?utm_source=generator&theme=0`;
+        musicPlayer.title = `Audio de Morat: ${songName}`;
+        musicPlayerStatus.textContent = `Seleccionada: ${songName}. Toca reproducir para escuchar.`;
+      });
+
+      musicWidgetToggle.addEventListener("click", () => {
+        const isExpanded = musicWidgetToggle.getAttribute("aria-expanded") === "true";
+        musicWidget.classList.toggle("is-collapsed", isExpanded);
+        musicWidgetToggle.setAttribute("aria-expanded", String(!isExpanded));
+        musicWidgetToggle.setAttribute("aria-label", isExpanded ? "Expandir reproductor" : "Minimizar reproductor");
+        musicWidgetToggle.textContent = isExpanded ? "+" : "−";
       });
 
       const themedSymbols = [
