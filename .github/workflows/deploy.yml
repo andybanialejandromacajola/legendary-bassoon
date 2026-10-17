@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, codespace-legendary-bassoon-vgpqjx4jj4rhwj47]
   workflow_dispatch:
 
 permissions:
