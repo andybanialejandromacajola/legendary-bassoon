@@ -421,8 +421,8 @@
   const giftStatus = $("race-gift-status");
   const giftMessage = $("race-gift-message");
   const sparkles = $("race-gift-sparkles");
-  const thirdGameButton = $("launch-gift-game");
-  const thirdGameLockStatus = $("gift-game-lock-status");
+  const lettersButton = $("launch-gift-game");
+  const lettersLockStatus = $("gift-game-lock-status");
   const sparkleColors = ["#f26475", "#ffd82f", "#79aee8", "#7eb780", "#a779c5"];
 
   function openGift() {
@@ -430,7 +430,7 @@
     gift.classList.add("is-open");
     giftPress.disabled = true;
     giftPress.setAttribute("aria-label", "El regalo está abierto");
-    giftStatus.textContent = "Toca la llave dorada para descubrir tu sorpresa.";
+    giftStatus.textContent = "Toca la llave dorada para desbloquear las tres cartas.";
     giftKey.hidden = false;
     window.requestAnimationFrame(() => giftKey.classList.add("is-visible"));
     for (let index = 0; index < 32; index += 1) {
@@ -442,25 +442,25 @@
     }
   }
 
-  function unlockThirdGame() {
+  function unlockLetters() {
     if (giftKey.hidden) return;
-    thirdGameButton.disabled = false;
-    thirdGameButton.setAttribute("aria-disabled", "false");
-    thirdGameLockStatus.classList.remove("coming-soon");
-    thirdGameLockStatus.classList.add("game-action");
-    thirdGameLockStatus.textContent = "🔓 ¡Sorpresa descubierta!";
+    lettersButton.disabled = false;
+    lettersButton.setAttribute("aria-disabled", "false");
+    lettersLockStatus.classList.remove("coming-soon");
+    lettersLockStatus.classList.add("game-action");
+    lettersLockStatus.textContent = "🔓 Ya puedes abrir las cartas";
     giftKey.disabled = true;
     giftKey.hidden = true;
     giftStatus.textContent = "";
-    giftMessage.textContent = "Felicidades Pato lograste encontrar la llave";
+    giftMessage.textContent = "¡Encontraste la llave! Ya puedes abrir las tres cartas.";
     giftMessage.hidden = false;
   }
 
   giftPress.addEventListener("click", openGift);
-  giftKey.addEventListener("click", unlockThirdGame);
+  giftKey.addEventListener("click", unlockLetters);
 
-  thirdGameButton.addEventListener("click", () => {
-    if (thirdGameButton.disabled) return;
+  lettersButton.addEventListener("click", () => {
+    if (lettersButton.disabled) return;
     const lettersSection = $("birthday-letters");
     lettersSection.hidden = false;
     lettersSection.scrollIntoView({ behavior: "smooth", block: "start" });
