@@ -76,6 +76,8 @@
   let moves = 0;
   let busy = false;
   let hintTimeout = 0;
+  let resolutionTimeout = 0;
+  let tileButtons = new Map();
 
   function createLayout(level) {
     const result = [];
@@ -162,7 +164,8 @@
 
   function availableTiles() {
     const remaining = tiles.filter((tile) => !tile.removed && !tile.matching);
-    return remaining.filter((tile) => isFree(tile, remaining));
+    const topLayer = Math.max(...remaining.map((tile) => tile.layer));
+    return remaining.filter((tile) => tile.layer === topLayer);
   }
 
   function tileFace(tile) {
@@ -171,6 +174,7 @@
     image.src = tile.face.image;
     image.alt = "";
     image.loading = "lazy";
+    image.decoding = "async";
     return image;
   }
 
@@ -214,43 +218,57 @@
 
   function renderBoard() {
     const level = levels[levelIndex];
-    board.replaceChildren();
     board.style.gridTemplateColumns = `repeat(${level.columns}, minmax(0, 1fr))`;
     board.style.gridTemplateRows = `repeat(${level.rows}, minmax(0, 1fr))`;
     board.style.aspectRatio = `${level.columns} / ${level.rows * 1.13}`;
+    if (tileButtons.size !== tiles.length) {
+      board.replaceChildren();
+      tileButtons.clear();
+      tiles.forEach((tile) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "mahjong-tile";
+        button.dataset.tileId = tile.id;
+        button.dataset.kind = tile.face.id;
+        button.dataset.layer = String(tile.layer);
+        button.style.gridColumn = String(tile.x + 1);
+        button.style.gridRow = String(tile.y + 1);
+        button.style.zIndex = String(tile.layer + 1);
+        if (tile.layer > 0) {
+          button.style.transform = `translate(${tile.layer * 12}%, ${tile.layer * -12}%)`;
+        }
+        button.append(tileFace(tile));
+        tileButtons.set(tile.id, button);
+        board.append(button);
+      });
+    }
+
     const available = new Set(availableTiles());
-    tiles.filter((tile) => !tile.removed).forEach((tile) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "mahjong-tile";
-      button.dataset.tileId = tile.id;
-      button.dataset.kind = tile.face.id;
-      button.dataset.layer = String(tile.layer);
-      button.style.gridColumn = String(tile.x + 1);
-      button.style.gridRow = String(tile.y + 1);
-      button.style.zIndex = String(tile.layer + 1);
-      if (tile.layer > 0) {
-        button.style.transform = `translate(${tile.layer * 12}%, ${tile.layer * -12}%)`;
-      }
+    tiles.forEach((tile) => {
+      const button = tileButtons.get(tile.id);
+      button.hidden = tile.removed;
       const isAvailable = available.has(tile);
       button.classList.toggle("is-available", isAvailable && !busy);
       button.classList.toggle("is-covered", !isAvailable);
       button.disabled = !isAvailable || busy;
       button.setAttribute("aria-label", `${tile.face.label}${isAvailable ? ", disponible" : ", bloqueada"}`);
       button.setAttribute("aria-disabled", String(!isAvailable || busy));
-      if (selected.includes(tile.id)) button.classList.add("is-selected");
-      button.append(tileFace(tile));
-      board.append(button);
+      button.classList.toggle("is-selected", selected.includes(tile.id));
     });
     updateHud();
   }
 
   function beginLevel(index) {
+    window.clearTimeout(resolutionTimeout);
+    window.clearTimeout(hintTimeout);
+    resolutionTimeout = 0;
+    hintTimeout = 0;
     levelIndex = index;
     matchedPairs = 0;
     moves = 0;
     selected = [];
     busy = false;
+    tileButtons.clear();
     $("mahjong-level-overlay").hidden = true;
     $("mahjong-board").hidden = false;
     $("mahjong-skip-level").disabled = false;
@@ -300,28 +318,34 @@
       $("mahjong-message").textContent = `¡Pareja encontrada! ${first.face.label} ✨`;
       busy = true;
       renderBoard();
-      window.setTimeout(() => {
+      resolutionTimeout = window.setTimeout(() => {
         first.removed = true;
         second.removed = true;
         first.matching = false;
         second.matching = false;
         matchedPairs += 1;
         busy = false;
+        resolutionTimeout = 0;
         renderBoard();
         if (tiles.every((entry) => entry.removed)) showLevelComplete();
-        else         $("mahjong-message").textContent = "¡Bien! Ya despejaste esta capa; ahora puedes jugar las fichas de abajo.";
+        else $("mahjong-message").textContent = "¡Bien! Ya despejaste esta capa; ahora puedes jugar las fichas de abajo.";
       }, 360);
       return;
     }
 
+    busy = true;
     renderBoard();
-    const firstButton = board.querySelector(`[data-tile-id="${CSS.escape(first.id)}"]`);
-    const secondButton = board.querySelector(`[data-tile-id="${CSS.escape(second.id)}"]`);
+    const firstButton = tileButtons.get(first.id);
+    const secondButton = tileButtons.get(second.id);
     firstButton?.classList.add("is-miss");
     secondButton?.classList.add("is-miss");
     $("mahjong-message").textContent = "No son iguales. Observa el símbolo y prueba con otra ficha.";
-    window.setTimeout(() => {
+    resolutionTimeout = window.setTimeout(() => {
       selected = [];
+      busy = false;
+      resolutionTimeout = 0;
+      firstButton?.classList.remove("is-miss");
+      secondButton?.classList.remove("is-miss");
       renderBoard();
     }, 430);
   }
@@ -335,8 +359,8 @@
       return;
     }
     const partner = free.find((tile) => tile.id !== pair.id && tile.face.id === pair.face.id);
-    const first = board.querySelector(`[data-tile-id="${CSS.escape(pair.id)}"]`);
-    const second = board.querySelector(`[data-tile-id="${CSS.escape(partner.id)}"]`);
+    const first = tileButtons.get(pair.id);
+    const second = tileButtons.get(partner.id);
     first?.classList.add("is-selected");
     second?.classList.add("is-selected");
     $("mahjong-message").textContent = `Pista: hay una pareja libre de ${pair.face.label}.`;
@@ -406,7 +430,7 @@
     gift.classList.add("is-open");
     giftPress.disabled = true;
     giftPress.setAttribute("aria-label", "El regalo está abierto");
-    giftStatus.textContent = "Toca la llave dorada para desbloquear el juego número 3.";
+    giftStatus.textContent = "Toca la llave dorada para descubrir tu sorpresa.";
     giftKey.hidden = false;
     window.requestAnimationFrame(() => giftKey.classList.add("is-visible"));
     for (let index = 0; index < 32; index += 1) {
@@ -424,7 +448,7 @@
     thirdGameButton.setAttribute("aria-disabled", "false");
     thirdGameLockStatus.classList.remove("coming-soon");
     thirdGameLockStatus.classList.add("game-action");
-    thirdGameLockStatus.textContent = "🔓 Ya puedes descubrirlo";
+    thirdGameLockStatus.textContent = "🔓 ¡Sorpresa descubierta!";
     giftKey.disabled = true;
     giftKey.hidden = true;
     giftStatus.textContent = "";
@@ -442,19 +466,19 @@
     lettersSection.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 
-  const letterItem = $("letter-one");
-  const letterToggle = $("letter-one-toggle");
-  const letterNote = $("letter-one-note");
-  const letterStatus = $("letter-one-status");
-  letterToggle.addEventListener("click", () => {
-    const isOpen = letterToggle.getAttribute("aria-expanded") !== "true";
-    letterItem.classList.toggle("is-open", isOpen);
-    letterToggle.setAttribute("aria-expanded", String(isOpen));
-    letterToggle.setAttribute("aria-label", `${isOpen ? "Cerrar" : "Abrir"} la carta`);
-    letterNote.setAttribute("aria-hidden", String(!isOpen));
-    letterStatus.textContent = `Carta ${isOpen ? "abierta" : "cerrada"}`;
+  document.querySelectorAll(".letter-item").forEach((letterItem) => {
+    const letterToggle = letterItem.querySelector(".letter-cover");
+    const letterNote = letterItem.querySelector(".letter-note");
+    const letterStatus = letterItem.querySelector(".letter-status");
+    letterToggle.addEventListener("click", () => {
+      const isOpen = letterToggle.getAttribute("aria-expanded") !== "true";
+      letterItem.classList.toggle("is-open", isOpen);
+      letterToggle.setAttribute("aria-expanded", String(isOpen));
+      letterToggle.setAttribute("aria-label", `${isOpen ? "Cerrar" : "Abrir"} la carta`);
+      letterNote.setAttribute("aria-hidden", String(!isOpen));
+      letterStatus.textContent = `Carta ${isOpen ? "abierta" : "cerrada"}`;
+    });
   });
 
   renderPhotoCredits();
-  beginLevel(0);
 })();
