@@ -88,6 +88,103 @@
       overflow: visible;
     }
 
+    .cake-scene {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .cake-scene:focus-visible {
+      outline: 3px solid #235b3a;
+      outline-offset: 5px;
+    }
+
+    .cake-fireworks {
+      position: absolute;
+      z-index: 2;
+      inset: 0;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .cake-fireworks span {
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--sparkle-color);
+      box-shadow: 0 0 9px var(--sparkle-color);
+      animation: cake-firework-burst 900ms cubic-bezier(.16,.72,.28,1) both;
+    }
+
+    .cake-hint {
+      margin: -5px 0 0;
+      color: var(--leaf-soft);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .music-section {
+      width: min(760px, 100%);
+      margin: 38px auto 0;
+      padding: 22px;
+      border: 1px solid rgba(73,54,81,.42);
+      border-radius: 14px;
+      background: rgba(255,255,255,.32);
+    }
+
+    .music-intro {
+      margin: 8px 0 16px;
+      color: var(--leaf-soft);
+      font-weight: 700;
+    }
+
+    .music-songs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .music-song {
+      min-height: 44px;
+      padding: 9px 12px;
+      border: 1px solid var(--purple-edge);
+      border-radius: 8px;
+      background: rgba(255,255,255,.65);
+      color: var(--leaf);
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .music-song[aria-pressed="true"] {
+      background: var(--purple-dark);
+      color: #fff;
+    }
+
+    .music-song:focus-visible {
+      outline: 3px solid #235b3a;
+      outline-offset: 3px;
+    }
+
+    .music-player-status {
+      min-height: 24px;
+      margin: 12px 0 8px;
+      color: var(--leaf);
+      font-weight: 700;
+    }
+
+    .music-player {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border: 0;
+      border-radius: 10px;
+      background: #201b24;
+    }
+
     .icing-text {
       fill: #ffdc35;
       stroke: #d3a612;
@@ -1010,6 +1107,12 @@
       45% { opacity: 1; transform: scale(1.05); }
     }
 
+    @keyframes cake-firework-burst {
+      0% { opacity: 1; transform: translate(-50%, -50%) scale(.35); }
+      78% { opacity: 1; transform: translate(var(--sparkle-x), var(--sparkle-y)) scale(1); }
+      100% { opacity: 0; transform: translate(var(--sparkle-x), var(--sparkle-y)) scale(.25); }
+    }
+
     @keyframes confetti-fall {
       to { transform: translateY(240px) rotate(520deg); }
     }
@@ -1321,6 +1424,8 @@
       .race-throttle-controls .race-drive-button { min-width: 112px; }
       .race-route-options { grid-template-columns: minmax(0, 1fr); }
       .race-upgrade-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .music-section { padding: 16px 12px; }
+      .music-songs { grid-template-columns: 1fr; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1334,7 +1439,7 @@
     <h1><span>¡Feliz</span><span>cumple, Pato!</span></h1>
     <p class="subtitle">Que tu día esté lleno de risas, pastel y cosas bonitas.</p>
 
-    <section class="cake-scene" aria-label="Pastel morado de cumpleaños con un pato amarillo">
+    <button class="cake-scene" id="cake-trigger" type="button" aria-label="Tocar el pastel para ver fuegos artificiales">
       <svg class="cake-art" viewBox="0 0 540 510" role="img" aria-label="Pastel redondo morado con letras amarillas y un pato sonriente">
         <title>Pastel de cumpleaños de Pato</title>
         <defs>
@@ -1416,6 +1521,36 @@
           <path d="M61 120 L94 112" fill="none" stroke="#e1e5e3" stroke-linecap="round" stroke-width="3" />
         </g>
       </svg>
+      <span class="cake-fireworks" id="cake-fireworks" aria-hidden="true"></span>
+    </button>
+    <p class="cake-hint" id="cake-hint" aria-live="polite">Toca el pastel para ver fuegos artificiales 🎆</p>
+
+    <section class="music-section" aria-labelledby="music-heading">
+      <h2 class="section-title" id="music-heading">Música de Morat 🎵</h2>
+      <p class="music-intro">Elige una canción para reproducirla aquí desde YouTube.</p>
+      <div class="music-songs" id="music-songs">
+        <button class="music-song" type="button" data-video-id="OukQDrJ7QRQ" aria-pressed="false">1. Aprender a quererte</button>
+        <button class="music-song" type="button" data-video-id="hVR5KK2T8zQ" aria-pressed="false">2. Bajo la mesa</button>
+        <button class="music-song" type="button" data-video-id="X0KkNGp6YNU" aria-pressed="false">3. El embrujo</button>
+        <button class="music-song" type="button" data-video-id="1oeD2m2UQAI" aria-pressed="false">4. Besos en guerra</button>
+        <button class="music-song" type="button" data-video-id="IaONcfo04mc" aria-pressed="false">5. Cuando el amor se escapa</button>
+        <button class="music-song" type="button" data-video-id="sfv0xWONROg" aria-pressed="false">6. Mi suerte</button>
+        <button class="music-song" type="button" data-video-id="uldstTKAytg" aria-pressed="false">7. Acuérdate de mí</button>
+        <button class="music-song" type="button" data-video-id="ZCh1O-7oTUI" aria-pressed="false">8. Mil tormentas</button>
+        <button class="music-song" type="button" data-video-id="ooCnP_s0K6s" aria-pressed="false">9. Mi vida entera</button>
+        <button class="music-song" type="button" data-video-id="UKbhDRxm3Vc" aria-pressed="false">10. Mi nuevo vicio</button>
+      </div>
+      <p class="music-player-status" id="music-player-status" role="status" aria-live="polite">Selecciona una canción para empezar a escuchar.</p>
+      <iframe
+        class="music-player"
+        id="music-player"
+        title="Reproductor de canciones de Morat en YouTube"
+        loading="lazy"
+        hidden
+        allow="autoplay; encrypted-media; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      ></iframe>
     </section>
 
     <section class="games-section" aria-labelledby="games-heading">
@@ -1628,6 +1763,53 @@
   </main>
   <script>
     (() => {
+      const cakeTrigger = document.getElementById("cake-trigger");
+      const cakeFireworks = document.getElementById("cake-fireworks");
+      const cakeHint = document.getElementById("cake-hint");
+      const fireworkColors = ["#ffd82f", "#f26475", "#5b9bd5", "#69a877", "#a779c5", "#fff"];
+
+      cakeTrigger.addEventListener("click", () => {
+        cakeFireworks.replaceChildren();
+        const { width, height } = cakeTrigger.getBoundingClientRect();
+        const bursts = [
+          { x: width * 0.25, y: height * 0.34 },
+          { x: width * 0.5, y: height * 0.16 },
+          { x: width * 0.75, y: height * 0.34 },
+        ];
+
+        bursts.forEach(({ x, y }, burstIndex) => {
+          for (let particleIndex = 0; particleIndex < 16; particleIndex += 1) {
+            const angle = (Math.PI * 2 * particleIndex) / 16;
+            const distance = width * (0.09 + Math.random() * 0.09);
+            const particle = document.createElement("span");
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+            particle.style.setProperty("--sparkle-x", `${Math.cos(angle) * distance}px`);
+            particle.style.setProperty("--sparkle-y", `${Math.sin(angle) * distance}px`);
+            particle.style.setProperty("--sparkle-color", fireworkColors[(particleIndex + burstIndex) % fireworkColors.length]);
+            particle.addEventListener("animationend", () => particle.remove(), { once: true });
+            cakeFireworks.append(particle);
+          }
+        });
+
+        cakeHint.textContent = "¡Feliz cumpleaños! 🎆";
+      });
+
+      const musicPlayer = document.getElementById("music-player");
+      const musicPlayerStatus = document.getElementById("music-player-status");
+      document.getElementById("music-songs").addEventListener("click", (event) => {
+        const songButton = event.target.closest("[data-video-id]");
+        if (!songButton) return;
+
+        musicPlayer.hidden = false;
+        musicPlayer.src = `https://www.youtube-nocookie.com/embed/${songButton.dataset.videoId}?autoplay=1&playsinline=1&rel=0`;
+        musicPlayer.title = `YouTube: ${songButton.textContent.trim()}`;
+        musicPlayerStatus.textContent = `Reproduciendo: ${songButton.textContent.trim()}`;
+        document.querySelectorAll(".music-song").forEach((button) => {
+          button.setAttribute("aria-pressed", String(button === songButton));
+        });
+      });
+
       const themedSymbols = [
         { id: "panda", label: "Panda", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSR7LDuBp1Yk4XjG2e5OKueWT6vEnElH6PylL_A9SyF1Q&s=10" },
         { id: "duck", label: "Pato", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvqdY55sXyIYTaqlSTZGt7ERxM7G7fU25aduKvodEYxw&s=10" },
