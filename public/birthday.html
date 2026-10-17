@@ -128,8 +128,8 @@
     .music-widget {
       position: fixed;
       z-index: 20;
-      right: 16px;
-      bottom: calc(16px + env(safe-area-inset-bottom));
+      top: calc(12px + env(safe-area-inset-top));
+      left: 12px;
       width: min(340px, calc(100vw - 24px));
       padding: 12px;
       border: 1px solid rgba(73,54,81,.42);
@@ -186,6 +186,24 @@
       gap: 8px;
     }
 
+    .music-start-button {
+      min-height: 42px;
+      padding: 8px 12px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--purple-dark);
+      color: #fff;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 800;
+      touch-action: manipulation;
+    }
+
+    .music-start-button:focus-visible {
+      outline: 3px solid var(--purple);
+      outline-offset: 2px;
+    }
+
     .music-select-label {
       color: var(--leaf-soft);
       font-size: 13px;
@@ -214,16 +232,23 @@
       line-height: 1.4;
     }
 
-    .music-player {
-      display: block;
+    .music-player-shell {
       width: 100%;
       height: 152px;
+      overflow: hidden;
       border: 0;
       border-radius: 12px;
       background: #fff;
     }
 
-    .music-player[hidden] { display: none; }
+    .music-player-shell iframe {
+      display: block;
+      width: 100% !important;
+      height: 152px !important;
+      border: 0;
+      border-radius: 12px;
+    }
+
     .music-widget.is-collapsed .music-widget-header { margin-bottom: 0; }
     .music-widget.is-collapsed .music-widget-content { display: none; }
 
@@ -1467,8 +1492,8 @@
       .race-route-options { grid-template-columns: minmax(0, 1fr); }
       .race-upgrade-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .music-widget {
-        right: 10px;
-        bottom: calc(10px + env(safe-area-inset-bottom));
+        top: calc(8px + env(safe-area-inset-top));
+        left: 10px;
         width: min(360px, calc(100vw - 20px));
       }
     }
@@ -1578,7 +1603,6 @@
       <div class="music-widget-content" id="music-widget-content">
         <label class="music-select-label" for="music-select">Elige una canción</label>
         <select class="music-select" id="music-select" aria-describedby="music-player-status">
-          <option value="">Selecciona una canción</option>
           <option value="3zNcn4BaVfKORyx3uDfruW">Aprender a quererte</option>
           <option value="1D0wDWgc24OzKjFowMMxWH">Bajo la mesa</option>
           <option value="3iyCM8b7clmfGHTAeIzFHK">El embrujo</option>
@@ -1590,16 +1614,11 @@
           <option value="5gipgJiWDAjeZiebW0nr0G">Mi vida entera</option>
           <option value="5H7E0UH2F8drwjoz9ufPQm">Mi nuevo vicio</option>
         </select>
-        <p class="music-player-status" id="music-player-status" role="status" aria-live="polite">Elige una canción y toca reproducir en Spotify.</p>
-        <iframe
-          class="music-player"
-          id="music-player"
-          title="Reproductor de audio de Morat en Spotify"
-          loading="lazy"
-          hidden
-          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
-          referrerpolicy="strict-origin-when-cross-origin"
-        ></iframe>
+        <button class="music-start-button" id="music-start-button" type="button">▶ Iniciar música</button>
+        <p class="music-player-status" id="music-player-status" role="status" aria-live="polite">Intentando iniciar desde la canción 1. Si el teléfono lo bloquea, toca «Iniciar música».</p>
+        <div class="music-player-shell" id="music-player-shell" aria-label="Reproductor de audio de Morat en Spotify">
+          <div id="music-player"></div>
+        </div>
       </div>
     </aside>
 
@@ -1848,23 +1867,95 @@
       const musicWidget = document.getElementById("music-widget");
       const musicWidgetToggle = document.getElementById("music-widget-toggle");
       const musicSelect = document.getElementById("music-select");
-      const musicPlayer = document.getElementById("music-player");
+      const musicPlayerElement = document.getElementById("music-player");
+      const musicStartButton = document.getElementById("music-start-button");
       const musicPlayerStatus = document.getElementById("music-player-status");
+      const musicTrackIds = Array.from(musicSelect.options, (option) => option.value);
+      let musicTrackIndex = 0;
+      let musicController = null;
+      let musicHasStarted = false;
+      let musicIsAdvancing = false;
+
+      function playMoratTrack(index) {
+        musicTrackIndex = index;
+        musicHasStarted = false;
+        musicSelect.selectedIndex = index;
+        const songName = musicSelect.options[index].textContent;
+        musicPlayerStatus.textContent = `Reproduciendo ${index + 1} de ${musicTrackIds.length}: ${songName}`;
+        if (musicController) {
+          musicController.loadEntity(`spotify:track:${musicTrackIds[index]}`, false);
+          musicController.play();
+        }
+      }
+
       musicSelect.addEventListener("change", () => {
-        const trackId = musicSelect.value;
-        if (!trackId) {
-          musicPlayer.hidden = true;
-          musicPlayer.removeAttribute("src");
-          musicPlayerStatus.textContent = "Elige una canción y toca reproducir en Spotify.";
+        playMoratTrack(musicSelect.selectedIndex);
+      });
+
+      musicStartButton.addEventListener("click", () => {
+        if (!musicController) {
+          musicPlayerStatus.textContent = "El reproductor se está cargando. Toca «Iniciar música» de nuevo en un momento.";
           return;
         }
-
-        const songName = musicSelect.selectedOptions[0].textContent;
-        musicPlayer.hidden = false;
-        musicPlayer.src = `https://open.spotify.com/embed/track/${trackId}?utm_source=generator&theme=0`;
-        musicPlayer.title = `Audio de Morat: ${songName}`;
-        musicPlayerStatus.textContent = `Seleccionada: ${songName}. Toca reproducir para escuchar.`;
+        musicController.play();
+        musicPlayerStatus.textContent = `Intentando reproducir ${musicTrackIndex + 1} de ${musicTrackIds.length}.`;
       });
+
+      window.onSpotifyIframeApiReady = (SpotifyIframeApi) => {
+        SpotifyIframeApi.createController(
+          musicPlayerElement,
+          {
+            uri: `spotify:track:${musicTrackIds[musicTrackIndex]}`,
+            width: Math.max(240, Math.round(musicPlayerElement.parentElement.getBoundingClientRect().width)),
+            height: 152,
+          },
+          (controller) => {
+            musicController = controller;
+            controller.addListener("ready", () => {
+              musicPlayerStatus.textContent = "Intentando iniciar desde la canción 1. Si el teléfono lo bloquea, toca «Iniciar música».";
+              if (musicTrackIndex !== 0) {
+                controller.loadEntity(`spotify:track:${musicTrackIds[musicTrackIndex]}`, false);
+              }
+              controller.play();
+            });
+
+            controller.addListener("playback_started", (event) => {
+              const activeTrackId = event.data.playingURI.split(":").pop();
+              const activeTrackIndex = musicTrackIds.indexOf(activeTrackId);
+              if (activeTrackIndex === -1) return;
+              musicTrackIndex = activeTrackIndex;
+              musicSelect.selectedIndex = activeTrackIndex;
+              musicHasStarted = true;
+              musicIsAdvancing = false;
+              musicPlayerStatus.textContent = `Reproduciendo ${activeTrackIndex + 1} de ${musicTrackIds.length}: ${musicSelect.options[activeTrackIndex].textContent}`;
+            });
+
+            controller.addListener("playback_update", (event) => {
+              const { isPaused, duration, position } = event.data;
+              if (!isPaused) {
+                musicHasStarted = true;
+                return;
+              }
+              if (!musicHasStarted || musicIsAdvancing || duration <= 0 || position < duration - 1500) return;
+
+              musicIsAdvancing = true;
+              if (musicTrackIndex < musicTrackIds.length - 1) {
+                playMoratTrack(musicTrackIndex + 1);
+              } else {
+                musicPlayerStatus.textContent = "Terminó la lista de canciones de Morat. 🎵";
+              }
+            });
+          },
+        );
+      };
+
+      const spotifyIframeApi = document.createElement("script");
+      spotifyIframeApi.src = "https://open.spotify.com/embed/iframe-api/v1";
+      spotifyIframeApi.async = true;
+      spotifyIframeApi.addEventListener("error", () => {
+        musicPlayerStatus.textContent = "No se pudo cargar Spotify. Revisa tu conexión e inténtalo de nuevo.";
+      });
+      document.body.append(spotifyIframeApi);
 
       musicWidgetToggle.addEventListener("click", () => {
         const isExpanded = musicWidgetToggle.getAttribute("aria-expanded") === "true";
