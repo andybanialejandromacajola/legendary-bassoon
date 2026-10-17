@@ -466,19 +466,5 @@
     lettersSection.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 
-  document.querySelectorAll(".letter-item").forEach((letterItem) => {
-    const letterToggle = letterItem.querySelector(".letter-cover");
-    const letterNote = letterItem.querySelector(".letter-note");
-    const letterStatus = letterItem.querySelector(".letter-status");
-    letterToggle.addEventListener("click", () => {
-      const isOpen = letterToggle.getAttribute("aria-expanded") !== "true";
-      letterItem.classList.toggle("is-open", isOpen);
-      letterToggle.setAttribute("aria-expanded", String(isOpen));
-      letterToggle.setAttribute("aria-label", `${isOpen ? "Cerrar" : "Abrir"} la carta`);
-      letterNote.setAttribute("aria-hidden", String(!isOpen));
-      letterStatus.textContent = `Carta ${isOpen ? "abierta" : "cerrada"}`;
-    });
-  });
-
   renderPhotoCredits();
 })();
