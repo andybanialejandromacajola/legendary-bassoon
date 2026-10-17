@@ -1418,7 +1418,7 @@
       </svg>
     </section>
 
-    <section class="letters-section" id="birthday-letters" aria-labelledby="letters-heading">
+    <section class="letters-section" id="birthday-letters" aria-labelledby="letters-heading" hidden>
       <h2 class="section-title" id="letters-heading">¿Qué hay aquí?</h2>
       <p class="letters-intro">Toca una carta para abrirla.</p>
       <div class="letter-grid">
@@ -1486,10 +1486,10 @@
           <span class="game-title">Mahjong de la sorpresa</span>
           <span class="game-action">Jugar</span>
         </button>
-        <button class="game-launcher" id="launch-gift-game" type="button" aria-controls="birthday-letters" aria-describedby="gift-game-lock-status">
+        <button class="game-launcher" id="launch-gift-game" type="button" disabled aria-controls="birthday-letters" aria-describedby="gift-game-lock-status">
           <span class="game-art" aria-hidden="true">💌</span>
-          <span class="game-title">Las tres cartas</span>
-          <span class="game-action" id="gift-game-lock-status">Abrir las cartas</span>
+          <span class="game-title">¿Qué hay aquí?</span>
+          <span class="coming-soon" id="gift-game-lock-status">Encuentra la llave en Mahjong</span>
         </button>
       </div>
     </section>
@@ -1601,7 +1601,7 @@
     </section>
     <section class="race-surprise" id="race-surprise" hidden aria-labelledby="race-surprise-title">
       <h2 id="race-surprise-title">🎁 ¡El panda y el osito te tienen una sorpresa!</h2>
-      <p class="race-surprise-copy">Toca el regalo que sostienen para descubrir una llave sorpresa.</p>
+      <p class="race-surprise-copy">Toca el regalo que sostienen para encontrar la llave de las tres cartas.</p>
       <div class="race-gift-scene">
         <div class="race-gift-stage" id="race-gift-stage">
           <div class="race-gift-art">
@@ -1611,7 +1611,7 @@
             <div class="race-gift-sparkles" id="race-gift-sparkles" aria-hidden="true"></div>
           </div>
           <button class="race-gift-press" id="race-gift-press" type="button" aria-label="Abrir el regalo que sostienen el panda y el osito"></button>
-          <button class="race-gift-key" id="race-gift-key" type="button" aria-label="Usar la llave dorada para descubrir la sorpresa" hidden>
+          <button class="race-gift-key" id="race-gift-key" type="button" aria-label="Usar la llave dorada para desbloquear las tres cartas" hidden>
             <svg viewBox="0 0 100 100" aria-hidden="true">
               <circle cx="28" cy="35" r="19" fill="none" stroke="currentColor" stroke-width="9"/>
               <circle cx="28" cy="35" r="7" fill="none" stroke="currentColor" stroke-width="4"/>
@@ -1621,8 +1621,8 @@
           </button>
         </div>
       </div>
-      <p class="race-gift-status" id="race-gift-status" role="status" aria-live="polite">El regalo está cerrado. Tócalo para sacar la llave.</p>
-      <p class="race-gift-message" id="race-gift-message" hidden>Felicidades Pato lograste encontrar la llave</p>
+      <p class="race-gift-status" id="race-gift-status" role="status" aria-live="polite">El regalo está cerrado. Tócalo para encontrar la llave de las cartas.</p>
+      <p class="race-gift-message" id="race-gift-message" hidden>¡Encontraste la llave! Ya puedes abrir las tres cartas.</p>
     </section>
 
   </main>
