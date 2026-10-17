@@ -248,7 +248,7 @@
       position: relative;
       z-index: 1;
       display: grid;
-      grid-template-columns: minmax(0, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
       justify-content: center;
       gap: 22px;
       padding: 8px 0;
@@ -256,7 +256,7 @@
     }
 
     .letter-item {
-      width: min(100%, 720px);
+      width: 100%;
       min-width: 0;
       margin-inline: auto;
       text-align: center;
@@ -406,34 +406,18 @@
 
     .letter-paper {
       position: relative;
-      min-height: 190px;
       margin-top: -5px;
-      padding: clamp(22px, 5vw, 40px) clamp(18px, 5vw, 38px);
+      overflow: hidden;
+    }
+
+    .letter-image {
+      display: block;
+      width: min(100%, 640px);
+      height: auto;
+      margin-inline: auto;
       border: 2px solid rgba(255,255,255,.9);
       border-radius: 4px 4px 10px 10px;
-      background:
-        linear-gradient(90deg, transparent 0 27px, rgba(224,145,162,.26) 28px 29px, transparent 30px),
-        repeating-linear-gradient(transparent 0 35px, rgba(173,153,130,.13) 36px 37px),
-        #fffdfd;
-      box-shadow: 0 10px 18px rgba(113,68,83,.16), inset 0 0 0 5px rgba(255,255,255,.3);
-    }
-
-    .letter-message {
-      color: #573746;
-      font-family: "Caveat", "Segoe Print", "Bradley Hand", "Apple Chancery", cursive;
-      font-size: clamp(23px, 2.5vw, 28px);
-      font-weight: 500;
-      line-height: 1.38;
-      text-align: left;
-      overflow-wrap: anywhere;
-    }
-
-    .letter-message p {
-      margin: 0 0 16px;
-    }
-
-    .letter-message p:last-child {
-      margin-bottom: 0;
+      box-shadow: 0 10px 18px rgba(113,68,83,.16);
     }
 
     .letter-status {
@@ -487,10 +471,11 @@
     .mahjong-tile[data-layer="1"] { --tile-edge-shadow: 0 4px 0 #c9b998; --tile-shadow-y: 8px; --tile-shadow-blur: 11px; --tile-shadow-opacity: .3; }
     .mahjong-tile[data-layer="2"] { --tile-edge-shadow: 0 5px 0 #c4b18e; --tile-shadow-y: 10px; --tile-shadow-blur: 14px; --tile-shadow-opacity: .34; }
     .mahjong-tile[data-layer="3"] { --tile-edge-shadow: 0 6px 0 #bba681; --tile-shadow-y: 12px; --tile-shadow-blur: 17px; --tile-shadow-opacity: .38; }
-    .mahjong-tile.is-available:not(.is-selected) { outline: 3px solid #9bce83; outline-offset: 1px; box-shadow: var(--tile-edge-shadow), 0 var(--tile-shadow-y) var(--tile-shadow-blur) rgba(49,37,50,var(--tile-shadow-opacity)), 0 0 0 4px rgba(201,235,185,.8), 0 0 20px 5px rgba(170,220,146,.72), inset 0 1px 2px rgba(255,255,255,.95); }
-    .mahjong-tile.is-available:not(.is-selected):hover { translate: 0 -4px; outline-color: #83bd68; box-shadow: var(--tile-edge-shadow), 0 calc(var(--tile-shadow-y) + 4px) calc(var(--tile-shadow-blur) + 3px) rgba(49,37,50,var(--tile-shadow-opacity)), 0 0 0 5px rgba(191,230,176,.88), 0 0 24px 7px rgba(155,211,129,.82), inset 0 1px 2px rgba(255,255,255,.95); }
+    .mahjong-tile.is-available:not(.is-selected) { box-shadow: var(--tile-edge-shadow), 0 var(--tile-shadow-y) var(--tile-shadow-blur) rgba(49,37,50,var(--tile-shadow-opacity)), inset 0 1px 2px rgba(255,255,255,.95); }
+    .mahjong-tile.is-available:not(.is-selected):hover { translate: 0 -4px; box-shadow: var(--tile-edge-shadow), 0 calc(var(--tile-shadow-y) + 4px) calc(var(--tile-shadow-blur) + 3px) rgba(49,37,50,var(--tile-shadow-opacity)), inset 0 1px 2px rgba(255,255,255,.95); }
     .mahjong-photo { display: block; width: 100%; height: 100%; min-height: 0; border-radius: 5px; object-fit: cover; background: #fff; box-shadow: inset 0 0 0 1px rgba(48,40,48,.1); }
-    .mahjong-tile.is-covered { filter: brightness(.82) saturate(.78); cursor: not-allowed; }
+    .mahjong-tile.is-covered { cursor: not-allowed; }
+    .mahjong-tile.is-covered .mahjong-photo { opacity: .45; }
     .mahjong-tile.is-selected { translate: 0 -7px; outline: 3px solid #765895; outline-offset: 1px; box-shadow: var(--tile-edge-shadow), 0 var(--tile-shadow-y) var(--tile-shadow-blur) rgba(49,37,50,var(--tile-shadow-opacity)), 0 0 15px rgba(179,222,158,.6); }
     .mahjong-tile:focus-visible, .mahjong-actions button:focus-visible, .mahjong-next:focus-visible { outline: 3px solid #235b3a; outline-offset: 3px; }
     .mahjong-tile.is-matched { animation: mahjong-clear 420ms ease forwards; pointer-events: none; }
@@ -510,6 +495,25 @@
     .mahjong-credits summary { cursor: pointer; font-weight: 800; text-align: center; }
     .mahjong-credits ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 18px; margin: 10px auto 0; padding-left: 20px; }
     .mahjong-credits a { color: var(--leaf); }
+    @media (pointer: coarse) {
+      .mahjong-tile {
+        box-shadow: 0 2px 0 #b9a889;
+        transition: none;
+      }
+      .mahjong-tile::after,
+      .mahjong-photo { box-shadow: none; }
+      .mahjong-tile.is-available:not(.is-selected) {
+        box-shadow: 0 2px 0 #b9a889;
+      }
+      .mahjong-tile.is-available:not(.is-selected):hover {
+        translate: none;
+        box-shadow: 0 2px 0 #b9a889;
+      }
+      .mahjong-tile.is-selected {
+        box-shadow: 0 2px 0 #b9a889;
+      }
+      .mahjong-tile.is-miss { animation: none; }
+    }
     @keyframes mahjong-clear { 35% { transform: scale(1.14) rotate(5deg); } 100% { transform: scale(.65) rotate(-8deg); opacity: 0; } }
     @keyframes mahjong-shake { 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-3px); } }
 
@@ -1427,10 +1431,10 @@
           <span class="game-title">Mahjong de la sorpresa</span>
           <span class="game-action">Jugar</span>
         </button>
-        <button class="game-launcher" id="launch-gift-game" type="button" disabled aria-controls="birthday-letters" aria-describedby="gift-game-lock-status">
+        <button class="game-launcher" id="launch-gift-game" type="button" aria-controls="birthday-letters" aria-describedby="gift-game-lock-status">
           <span class="game-art" aria-hidden="true">💌</span>
-          <span class="game-title">¿Qué hay aquí?</span>
-          <span class="coming-soon" id="gift-game-lock-status">La llave está en uno de los juegos</span>
+          <span class="game-title">Las tres cartas</span>
+          <span class="game-action" id="gift-game-lock-status">Abrir las cartas</span>
         </button>
       </div>
     </section>
@@ -1499,7 +1503,7 @@
                 </span>
               </button>
               <p class="lasagna-status" id="lasagna-status" role="status" aria-live="polite">Toca la lasaña para darle un bocado. Quedan 5.</p>
-              <p class="lasagna-finished" id="lasagna-finished" role="status" aria-live="polite" hidden>¡Te la terminaste! 🍝😂 Pero tranquilo… todavía quedan más sorpresas.</p>
+              <p class="lasagna-finished" id="lasagna-finished" role="status" aria-live="polite" hidden>Ups, aquí no está la llave 😂</p>
             </div>
             <button class="replay-action" id="play-again" type="button">Volver a jugar</button>
           </div>
@@ -1542,7 +1546,7 @@
     </section>
     <section class="race-surprise" id="race-surprise" hidden aria-labelledby="race-surprise-title">
       <h2 id="race-surprise-title">🎁 ¡El panda y el osito te tienen una sorpresa!</h2>
-      <p class="race-surprise-copy">Toca el regalo que sostienen para descubrir la llave que abre el juego número 3.</p>
+      <p class="race-surprise-copy">Toca el regalo que sostienen para descubrir una llave sorpresa.</p>
       <div class="race-gift-scene">
         <div class="race-gift-stage" id="race-gift-stage">
           <div class="race-gift-art">
@@ -1552,7 +1556,7 @@
             <div class="race-gift-sparkles" id="race-gift-sparkles" aria-hidden="true"></div>
           </div>
           <button class="race-gift-press" id="race-gift-press" type="button" aria-label="Abrir el regalo que sostienen el panda y el osito"></button>
-          <button class="race-gift-key" id="race-gift-key" type="button" aria-label="Usar la llave dorada para desbloquear el juego número 3" hidden>
+          <button class="race-gift-key" id="race-gift-key" type="button" aria-label="Usar la llave dorada para descubrir la sorpresa" hidden>
             <svg viewBox="0 0 100 100" aria-hidden="true">
               <circle cx="28" cy="35" r="19" fill="none" stroke="currentColor" stroke-width="9"/>
               <circle cx="28" cy="35" r="7" fill="none" stroke="currentColor" stroke-width="4"/>
@@ -1566,40 +1570,75 @@
       <p class="race-gift-message" id="race-gift-message" hidden>Felicidades Pato lograste encontrar la llave</p>
     </section>
 
-    <section class="letters-section" id="birthday-letters" aria-labelledby="letters-heading" hidden>
+    <section class="letters-section" id="birthday-letters" aria-labelledby="letters-heading">
       <h2 class="section-title" id="letters-heading">¿Qué hay aquí?</h2>
       <p class="letters-intro">Toca una carta para abrirla.</p>
       <div class="letter-grid">
         <article class="letter-item" id="letter-one">
           <button class="letter-cover" id="letter-one-toggle" type="button" aria-expanded="false" aria-controls="letter-one-note" aria-label="Abrir la carta">
             <span class="letter-ornament" aria-hidden="true">♥</span>
-            <span class="letter-label">Bany</span>
+            <span class="letter-label">Alison</span>
             <span class="letter-envelope" aria-hidden="true"><span class="letter-seal">♥</span></span>
             <span class="letter-cover-hint">Seleccionar para abrir</span>
           </button>
           <div class="letter-note" id="letter-one-note" aria-hidden="true">
             <div class="letter-note-inner">
-              <div class="letter-paper" aria-label="Carta de cumpleaños para Pato">
-                <div class="letter-message">
-                  <p>Hola, Pato. Espero que te haya gustado tu regalo. Intenté hacer lo mejor que pude; en mi defensa, no había hecho algo así de grande hace mucho tiempo jajajaja.</p>
-                  <p>Espero que disfrutés este día tan especial, Pato. Tenés que disfrutarlo. Sabés que siempre podrás contar conmigo y escribirme a la hora que querás. Sabés que podés hacerlo aunque sea a la 1 de la mañana y que te puedo responder.</p>
-                  <p>También te quería agradecer porque sos una de las mejores personas que se han cruzado en mi vida. Sos una luz, la verdad. No dejés que nadie te apague, porque sos única, Pato. De verdad, sos única.</p>
-                  <p>Nos dijiste que el mundo estaría mejor sin vos. ¡NO, PATO! Gracias a tu corazón grande, bondadoso, único e inigualable, el mundo sigue funcionando, ya que ahora es muy difícil, si no imposible, encontrar personas que tengan el corazón que vos tenés.</p>
-                  <p>Pato, cuando nos dijiste que el mundo estaría mejor sin vos, sabés cuánto me dolió que dijeras eso, porque me gustaría que te vieras como nosotros te miramos: una persona bondadosa, única e inigualable, con una luz que, por más que busquen, nunca podrán superar, y un corazón más brillante que el sol.</p>
-                  <p>Si tenés días en los que te sintás sola, me podés llamar o escribir lo que vos querrás. Yo voy a hacer todo lo posible por ayudarte a pasar esos días. Siempre voy a estar para apoyarte y hacerte compañía cuando lo necesités, aunque a veces tus ideas me den pena jajajaja. Pero sabés que nunca te diré que no.</p>
-                  <p>¡Que cumplás muchos años más, pero muchos años más, Pato! Ya quiero ver tu DPI jajajaja. Ya hay otro DPI que podemos usar jajajajaja.</p>
-                  <p>También te quiero agradecer por lo que me dijiste en la carta. La verdad, nadie me había hecho una y, aunque no lo creás, lloré por dentro. Incluso estoy llorando mientras escribo esta carta jajajaja.</p>
-                  <p>Sabés que siempre te voy a querer, Pato, y agradezco a Dios por haber cruzado nuestros caminos y por haberme permitido ser tu amigo este año. Siempre lo seguiré siendo, hasta mi muerte. Que nunca se te olvide eso.</p>
-                  <p>Espero que sí te haya gustado. Perdón por no poner todo lo que te gusta; lo intenté, pero las ideas y el tiempo no me alcanzaron. Lamento eso.</p>
-                  <p>Sabés que tenemos que ir a ver la película de <em>Avengers: Doomsday</em>. Y, como vos me dijiste que cuando me acuerde de vos suba una canción de Morat a mis notas, jajajaja, así lo haré.</p>
-                  <p>Te aprecio mucho, Pato. Sos una de las únicas personas a las que abrazo de verdad, y te mando un gran abrazo desde lejos.</p>
-                  <p>Pato, que disfrutés este día. Sabés que todas las personas que escribieron estas cartas te aprecian mucho; me incluyo.</p>
-                  <p>Que Dios te regrese toda la luz y el amor que nos has dado. ¡Que tengás un feliz cumpleeeee, Pato! 💗</p>
-                </div>
+              <div class="letter-paper" aria-label="Carta de cumpleaños para Darlyn">
+                <img
+                  class="letter-image"
+                  src="./birthday-letter.jpg"
+                  alt="Carta de cumpleaños para Darlyn, decorada con una foto, estrellas, corazones y música."
+                  width="1024"
+                  height="1536"
+                >
               </div>
             </div>
           </div>
           <p class="letter-status" id="letter-one-status" role="status" aria-live="polite">Carta cerrada</p>
+        </article>
+        <article class="letter-item" id="letter-two">
+          <button class="letter-cover" id="letter-two-toggle" type="button" aria-expanded="false" aria-controls="letter-two-note" aria-label="Abrir la carta">
+            <span class="letter-ornament" aria-hidden="true">♥</span>
+            <span class="letter-label">Don Dramas</span>
+            <span class="letter-envelope" aria-hidden="true"><span class="letter-seal">♥</span></span>
+            <span class="letter-cover-hint">Seleccionar para abrir</span>
+          </button>
+          <div class="letter-note" id="letter-two-note" aria-hidden="true">
+            <div class="letter-note-inner">
+              <div class="letter-paper" aria-label="Carta de cumpleaños para Pato">
+                <img
+                  class="letter-image"
+                  src="./don-dramas-letter.jpg"
+                  alt="Carta para Pato, con un pato de graduación, fotos de patos y un mensaje de cariño."
+                  width="899"
+                  height="1599"
+                >
+              </div>
+            </div>
+          </div>
+          <p class="letter-status" id="letter-two-status" role="status" aria-live="polite">Carta cerrada</p>
+        </article>
+        <article class="letter-item" id="letter-three">
+          <button class="letter-cover" id="letter-three-toggle" type="button" aria-expanded="false" aria-controls="letter-three-note" aria-label="Abrir la carta">
+            <span class="letter-ornament" aria-hidden="true">♥</span>
+            <span class="letter-label">Conejo</span>
+            <span class="letter-envelope" aria-hidden="true"><span class="letter-seal">♥</span></span>
+            <span class="letter-cover-hint">Seleccionar para abrir</span>
+          </button>
+          <div class="letter-note" id="letter-three-note" aria-hidden="true">
+            <div class="letter-note-inner">
+              <div class="letter-paper" aria-label="Carta para Conejo">
+                <img
+                  class="letter-image"
+                  src="./conejo-carta.png"
+                  alt="Carta para Conejo."
+                  width="4959"
+                  height="7016"
+                >
+              </div>
+            </div>
+          </div>
+          <p class="letter-status" id="letter-three-status" role="status" aria-live="polite">Carta cerrada</p>
         </article>
       </div>
     </section>
@@ -1614,8 +1653,8 @@
       ];
       const sixSymbolSet = [
         ...themedSymbols,
-        { id: "surprise-one", label: "Imagen sorpresa 1", image: "./morat-level2.jpg" },
-        { id: "surprise-two", label: "Imagen sorpresa 2", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTeyrVyGKAsQycaidHOFddtbyZ_S7hX9uLhQKUPqJ1--w&s=10" },
+        { id: "surprise-one", label: "Morat", image: "./morat-level2.jpg" },
+        { id: "surprise-two", label: "Besos Kitty", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTeyrVyGKAsQycaidHOFddtbyZ_S7hX9uLhQKUPqJ1--w&s=10" },
       ];
       const themedSolution = [
         ["panda", "duck", "star", "cake"],
