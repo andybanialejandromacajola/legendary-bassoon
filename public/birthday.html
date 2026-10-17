@@ -241,6 +241,8 @@
       background: #fff;
     }
 
+    .music-player-shell[hidden] { display: none; }
+
     .music-player-shell iframe {
       display: block;
       width: 100% !important;
@@ -1603,6 +1605,7 @@
       <div class="music-widget-content" id="music-widget-content">
         <label class="music-select-label" for="music-select">Elige una canción</label>
         <select class="music-select" id="music-select" aria-describedby="music-player-status">
+          <option value="" selected disabled>Selecciona una canción</option>
           <option value="3zNcn4BaVfKORyx3uDfruW">Aprender a quererte</option>
           <option value="1D0wDWgc24OzKjFowMMxWH">Bajo la mesa</option>
           <option value="3iyCM8b7clmfGHTAeIzFHK">El embrujo</option>
@@ -1614,9 +1617,9 @@
           <option value="5gipgJiWDAjeZiebW0nr0G">Mi vida entera</option>
           <option value="5H7E0UH2F8drwjoz9ufPQm">Mi nuevo vicio</option>
         </select>
-        <button class="music-start-button" id="music-start-button" type="button">▶ Iniciar música</button>
-        <p class="music-player-status" id="music-player-status" role="status" aria-live="polite">Intentando iniciar desde la canción 1. Si el teléfono lo bloquea, toca «Iniciar música».</p>
-        <div class="music-player-shell" id="music-player-shell" aria-label="Reproductor de audio de Morat en Spotify">
+        <button class="music-start-button" id="music-start-button" type="button" disabled>▶ Reproducir canción</button>
+        <p class="music-player-status" id="music-player-status" role="status" aria-live="polite">La música está en pausa. Elige la canción que quieras escuchar.</p>
+        <div class="music-player-shell" id="music-player-shell" aria-label="Reproductor de audio de Morat en Spotify" hidden>
           <div id="music-player"></div>
         </div>
       </div>
@@ -1868,12 +1871,14 @@
       const musicWidgetToggle = document.getElementById("music-widget-toggle");
       const musicSelect = document.getElementById("music-select");
       const musicPlayerElement = document.getElementById("music-player");
+      const musicPlayerShell = document.getElementById("music-player-shell");
       const musicStartButton = document.getElementById("music-start-button");
       const musicPlayerStatus = document.getElementById("music-player-status");
-      const musicTrackIds = Array.from(musicSelect.options, (option) => option.value);
-      let musicTrackIndex = 0;
-      let musicRequestedTrackId = musicTrackIds[0];
+      const musicTrackIds = Array.from(musicSelect.options, (option) => option.value).filter(Boolean);
+      let musicTrackIndex = -1;
+      let musicRequestedTrackId = null;
       let musicController = null;
+      let musicControllerReady = false;
       let musicHasStarted = false;
       let musicIsAdvancing = false;
 
@@ -1882,43 +1887,54 @@
         musicRequestedTrackId = musicTrackIds[index];
         musicHasStarted = false;
         musicIsAdvancing = false;
-        musicSelect.selectedIndex = index;
-        const songName = musicSelect.options[index].textContent;
-        musicPlayerStatus.textContent = `Cargando ${index + 1} de ${musicTrackIds.length}: ${songName}`;
-        if (musicController) {
+        musicSelect.value = musicRequestedTrackId;
+        musicStartButton.disabled = false;
+        musicPlayerShell.hidden = false;
+        const songName = musicSelect.selectedOptions[0].textContent;
+        musicPlayerStatus.textContent = `Cargando ${songName}…`;
+        if (musicController && musicControllerReady) {
           musicController.loadEntity(`spotify:track:${musicRequestedTrackId}`, false);
+          musicController.play();
+        } else {
+          musicPlayerStatus.textContent = `Elegiste ${songName}. Toca «Reproducir canción» cuando el reproductor esté listo.`;
         }
       }
 
       musicSelect.addEventListener("change", () => {
-        playMoratTrack(musicSelect.selectedIndex);
+        const index = musicTrackIds.indexOf(musicSelect.value);
+        if (index !== -1) playMoratTrack(index);
       });
 
       musicStartButton.addEventListener("click", () => {
-        if (!musicController) {
-          musicPlayerStatus.textContent = "El reproductor se está cargando. Toca «Iniciar música» de nuevo en un momento.";
+        if (musicTrackIndex === -1) {
+          musicPlayerStatus.textContent = "Primero elige la canción que quieras escuchar.";
           return;
         }
+        if (!musicController || !musicControllerReady) {
+          musicPlayerStatus.textContent = "Spotify todavía se está cargando. Inténtalo de nuevo en un momento.";
+          return;
+        }
+        musicController.loadEntity(`spotify:track:${musicRequestedTrackId}`, false);
         musicController.play();
-        musicPlayerStatus.textContent = `Intentando reproducir ${musicTrackIndex + 1} de ${musicTrackIds.length}.`;
+        musicPlayerStatus.textContent = `Reproduciendo ${musicTrackIndex + 1} de ${musicTrackIds.length}: ${musicSelect.selectedOptions[0].textContent}`;
       });
 
       window.onSpotifyIframeApiReady = (SpotifyIframeApi) => {
         SpotifyIframeApi.createController(
           musicPlayerElement,
           {
-            uri: `spotify:track:${musicTrackIds[musicTrackIndex]}`,
+            uri: `spotify:track:${musicTrackIds[0]}`,
             width: Math.max(240, Math.round(musicPlayerElement.parentElement.getBoundingClientRect().width)),
             height: 152,
           },
           (controller) => {
             musicController = controller;
             controller.addListener("ready", () => {
-              musicPlayerStatus.textContent = "Intentando iniciar desde la canción 1. Si el teléfono lo bloquea, toca «Iniciar música».";
-              if (musicTrackIndex !== 0) {
-                controller.loadEntity(`spotify:track:${musicTrackIds[musicTrackIndex]}`, false);
+              musicControllerReady = true;
+              if (musicTrackIndex !== -1) {
+                controller.loadEntity(`spotify:track:${musicRequestedTrackId}`, false);
+                musicPlayerStatus.textContent = `Elegiste ${musicSelect.selectedOptions[0].textContent}. Toca «Reproducir canción» para escuchar.`;
               }
-              controller.play();
             });
 
             controller.addListener("playback_started", (event) => {
@@ -1929,7 +1945,7 @@
               musicSelect.selectedIndex = activeTrackIndex;
               musicHasStarted = true;
               musicIsAdvancing = false;
-              musicPlayerStatus.textContent = `Reproduciendo ${activeTrackIndex + 1} de ${musicTrackIds.length}: ${musicSelect.options[activeTrackIndex].textContent}`;
+              musicPlayerStatus.textContent = `Reproduciendo ${activeTrackIndex + 1} de ${musicTrackIds.length}: ${musicSelect.selectedOptions[0].textContent}`;
             });
 
             controller.addListener("playback_update", (event) => {
